@@ -33,7 +33,7 @@ class Feed {
 
 		foreach ( $this->platforms as $platform ) {
 
-			$platformItems = $this->cache->get( $platform->getCacheKey(), [ $platform, 'get' ] );
+			$platformItems = $this->cache->get( $platform->getCacheKey(), [ $platform, 'get' ] ) ?? [];
 
 			$aggregateItems = \array_merge( $aggregateItems, $platformItems );
 
