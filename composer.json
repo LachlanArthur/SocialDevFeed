@@ -10,7 +10,6 @@
         }
     ],
     "require": {
-        "facebook/graph-sdk": "^5.7",
         "guzzlehttp/guzzle": "^6.5",
         "google/apiclient": "^2.4"
     },
