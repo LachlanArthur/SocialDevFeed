@@ -1,0 +1,22 @@
+{
+    "name": "lachlanarthur/social-dev-feed",
+    "description": "Pulls social media feeds and gives you the raw data.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lachlan Arthur",
+            "email": "lachlanarthur@gmail.com"
+        }
+    ],
+    "require": {
+        "facebook/graph-sdk": "^5.7",
+        "guzzlehttp/guzzle": "^6.5",
+        "google/apiclient": "^2.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "LachlanArthur\\SocialDevFeed\\": "src"
+        }
+    }
+}
