@@ -20,6 +20,10 @@ class FileCache implements CacheInterface {
 	public function __construct( $cachePath = null, $validity = 60 * 60 * 24 ) {
 		$this->cachePath = \rtrim( $cachePath ?? \sys_get_temp_dir(), '/' ) . '/';
 		$this->validity = $validity;
+
+		if ( ! is_dir( $this->cachePath ) ) {
+			mkdir( $this->cachePath, 0755, true );
+		}
 	}
 
 	public function get( $key, callable $setter = null ) {
