@@ -32,7 +32,7 @@ class Instagram extends AbstractPlatformBase {
 	public function get() {
 
 		try {
-			$response = $this->http->request( 'get', '/beeple_crap/?__a=1' );
+			$response = $this->http->request( 'get', "/{$this->username}/?__a=1" );
 			$json = \json_decode( (string) $response->getBody() );
 			$edges = $json->graphql->user->edge_owner_to_timeline_media->edges;
 		} catch ( \Exception $e ) {
