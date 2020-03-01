@@ -3,6 +3,7 @@
 namespace LachlanArthur\SocialDevFeed\Platforms;
 
 use LachlanArthur\SocialDevFeed\Entry;
+use LachlanArthur\SocialDevFeed\Meta;
 
 class Instagram extends AbstractPlatformBase {
 
@@ -29,11 +30,15 @@ class Instagram extends AbstractPlatformBase {
 		return self::$name . '-' . $this->username;
 	}
 
+	protected function getJson() {
+		$response = $this->http->request( 'get', "/{$this->username}/?__a=1" );
+		return \json_decode( (string) $response->getBody() );
+	}
+
 	public function getEntries() {
 
 		try {
-			$response = $this->http->request( 'get', "/{$this->username}/?__a=1" );
-			$json = \json_decode( (string) $response->getBody() );
+			$json = $this->getJson();
 			$edges = $json->graphql->user->edge_owner_to_timeline_media->edges;
 		} catch ( \Exception $e ) {
 			return null;
@@ -63,6 +68,25 @@ class Instagram extends AbstractPlatformBase {
 				];
 			}, $node->thumbnail_resources ),
 		] );
+
+	}
+
+	public function getMeta() {
+
+		try {
+			$json = $this->getJson();
+
+			$user = $json->graphql->user;
+
+			return new Meta( self::$name, [
+				'title' => $user->full_name,
+				'author' => $user->full_name,
+				'url' => "https://www.instagram.com/{$user->username}/",
+				'thumbnails' => [ 'url' => $user->profile_pic_url_hd ],
+			] );
+		} catch ( \Exception $e ) {
+			return null;
+		}
 
 	}
 

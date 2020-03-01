@@ -16,4 +16,9 @@ interface PlatformInterface {
 	 */
 	public function getEntries();
 
+	/**
+	 * @return Meta[]
+	 */
+	public function getMeta();
+
 }

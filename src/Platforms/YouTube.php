@@ -3,6 +3,8 @@
 namespace LachlanArthur\SocialDevFeed\Platforms;
 
 use LachlanArthur\SocialDevFeed\Entry;
+use LachlanArthur\SocialDevFeed\EntryImage;
+use LachlanArthur\SocialDevFeed\Meta;
 
 class YouTube extends AbstractPlatformBase {
 
@@ -55,10 +57,10 @@ class YouTube extends AbstractPlatformBase {
 	public function getEntries() {
 
 		try {
-		$items = $this->youtube->playlistItems->listPlaylistItems( 'snippet', [
-			'playlistId' => $this->playlistId,
-			'maxResults' => $this->limit,
-		] );
+			$items = $this->youtube->playlistItems->listPlaylistItems( 'snippet', [
+				'playlistId' => $this->playlistId,
+				'maxResults' => $this->limit,
+			] );
 		} catch ( \Exception $e ) {
 			// DO SOMETHING
 			return null;
@@ -81,15 +83,53 @@ class YouTube extends AbstractPlatformBase {
 			'title' => $snippet->getTitle(),
 			'description' => $snippet->getDescription(),
 			'datetime' => new \DateTime( $snippet->getPublishedAt(), new \DateTimeZone( 'UTC' ) ),
-			'thumbnails' => \array_map( function( $thumbnail ) {
-				return (object) [
-					'url' => $thumbnail->url,
-					'width' => $thumbnail->width,
-					'height' => $thumbnail->height,
-				];
-			}, \array_values( (array) $snippet->getThumbnails()->toSimpleObject() ) ),
+			'thumbnails' => self::processThumbnails( $snippet->getThumbnails() ),
 		] );
 
+	}
+
+	public function getMeta() {
+
+		try {
+			$playlistsResponse = $this->youtube->playlists->listPlaylists( 'snippet', [
+				'id' => $this->playlistId,
+			] );
+
+			$playlists = $playlistsResponse->getItems();
+
+			/** @var \Google_Service_YouTube_Playlist $playlist */
+			$playlist = reset( $playlists );
+
+			$snippet = $playlist->getSnippet();
+
+			return new Meta( self::$name, [
+				'title' => $snippet->getTitle(),
+				'author' => $snippet->getChannelTitle(),
+				'url' => "https://www.youtube.com/playlist?list={$this->playlistId}",
+				'thumbnails' => self::processThumbnails( $snippet->getThumbnails() ),
+			] );
+		} catch ( \Exception $e ) {
+			return null;
+		}
+
+	}
+
+	/**
+	 * @param \Google_Service_YouTube_ThumbnailDetails $youtubeThumbnails
+	 * @return EntryImage[]
+	 */
+	public static function processThumbnails( $youtubeThumbnails ) {
+		$thumbnails = [];
+
+		foreach ( \array_values( (array) $youtubeThumbnails->toSimpleObject() ) as $thumbnail ) {
+			$thumbnails[] = (object) [
+				'url' => $thumbnail->url,
+				'width' => $thumbnail->width,
+				'height' => $thumbnail->height,
+			];
+		}
+
+		return $thumbnails;
 	}
 
 }
