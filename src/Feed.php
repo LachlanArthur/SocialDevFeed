@@ -31,7 +31,7 @@ class Feed {
 	/**
 	 * @return Entry[]
 	 */
-	public function get( $limit = 20 ) {
+	public function getEntries( $limit = 20 ) {
 
 		$aggregateItems = [];
 

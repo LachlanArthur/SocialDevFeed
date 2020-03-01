@@ -43,10 +43,7 @@ class YouTube extends AbstractPlatformBase {
 		return self::$name . '-' . $this->playlistId;
 	}
 
-	/**
-	 * @return
-	 */
-	public function get() {
+	public function getEntries() {
 
 		$items = $this->youtube->playlistItems->listPlaylistItems( 'snippet', [
 			'playlistId' => $this->playlistId,

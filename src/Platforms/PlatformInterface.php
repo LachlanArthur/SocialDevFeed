@@ -14,6 +14,6 @@ interface PlatformInterface {
 	/**
 	 * @return Entry[]
 	 */
-	public function get();
+	public function getEntries();
 
 }

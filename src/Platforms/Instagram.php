@@ -29,7 +29,7 @@ class Instagram extends AbstractPlatformBase {
 		return self::$name . '-' . $this->username;
 	}
 
-	public function get() {
+	public function getEntries() {
 
 		try {
 			$response = $this->http->request( 'get', "/{$this->username}/?__a=1" );
