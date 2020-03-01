@@ -15,11 +15,11 @@ class Feed {
 	 */
 	public $platforms = [];
 
-	/** @var CacheInterface */
+	/** @var CacheInterface Defaults to a filesystem cache with a 24 hour lifetime */
 	public $cache;
 
 	function __construct( CacheInterface $cache = null ) {
-		$this->cache = $cache ?? new Psr16Cache( new FilesystemAdapter( 'lasdfg', 60 * 60 * 24, \sys_get_temp_dir() . '/social-dev-feed' ) );
+		$this->cache = $cache ?? new Psr16Cache( new FilesystemAdapter( 'lasdfg', 60 * 60 * 24, \sys_get_temp_dir() ) );
 	}
 
 	public function add( PlatformInterface $platform ) : void {
