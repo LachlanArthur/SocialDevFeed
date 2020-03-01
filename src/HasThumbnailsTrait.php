@@ -21,6 +21,11 @@ trait HasThumbnailsTrait {
 
 	}
 
+	/**
+	 * @param EntryImage $a
+	 * @param EntryImage $b
+	 * @return integer
+	 */
 	protected function compareThumbnails( $a, $b ) {
 
 		return ( $b->width * $b->height ) <=> ( $a->width * $a->height );
