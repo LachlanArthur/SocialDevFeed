@@ -55,9 +55,9 @@ class Instagram extends AbstractPlatformBase {
 
 		$thumbnails = [
 			(object) [
-				'image' => $node->display_url,
-				'imageWidth' => $node->dimensions->width,
-				'imageHeight' => $node->dimensions->height,
+				'url' => $node->display_url,
+				'width' => $node->dimensions->width,
+				'height' => $node->dimensions->height,
 			],
 		];
 
