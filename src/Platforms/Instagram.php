@@ -89,7 +89,7 @@ class Instagram extends AbstractPlatformBase {
 				'title' => $user->full_name,
 				'author' => $user->full_name,
 				'url' => "https://www.instagram.com/{$user->username}/",
-				'thumbnails' => [ 'url' => $user->profile_pic_url_hd ],
+				'thumbnails' => [ (object) [ 'url' => $user->profile_pic_url_hd ] ],
 			] );
 		} catch ( \Exception $e ) {
 			return null;
