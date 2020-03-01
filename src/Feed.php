@@ -16,10 +16,14 @@ class Feed {
 	public $platforms = [];
 
 	/** @var CacheInterface Defaults to a filesystem cache with a 24 hour lifetime */
-	public $cache;
+	public $entriesCache;
 
-	public function __construct( CacheInterface $cache = null ) {
-		$this->cache = $cache ?? new Psr16Cache( new FilesystemAdapter( 'lasdfg', 60 * 60 * 24, \sys_get_temp_dir() ) );
+	/** @var CacheInterface Defaults to a filesystem cache with a 30 day lifetime */
+	public $metaCache;
+
+	public function __construct( CacheInterface $entriesCache = null, CacheInterface $metaCache = null ) {
+		$this->entriesCache = $entriesCache ?? new Psr16Cache( new FilesystemAdapter( 'lasdfg-entries', 60 * 60 * 24,      \sys_get_temp_dir() ) );
+		$this->metaCache    = $metaCache    ?? new Psr16Cache( new FilesystemAdapter( 'lasdfg-meta',    60 * 60 * 24 * 30, \sys_get_temp_dir() ) );
 	}
 
 	public function add( PlatformInterface $platform ) : void {
@@ -59,7 +63,7 @@ class Feed {
 	public function getPlatformEntries( $platform ) {
 
 		/** @var Entry[] $entries */
-		$entries = $this->getCacheValueOtherwise( 'entries-' . $platform->getCacheKey(), [ $platform, 'getEntries' ] );
+		$entries = self::getCacheValueOtherwise( $this->entriesCache, $platform->getCacheKey(), [ $platform, 'getEntries' ] );
 
 		if ( ! \is_array( $entries ) ) {
 			$entries = [];
@@ -92,20 +96,20 @@ class Feed {
 	 */
 	public function getPlatformMeta( $platform ) {
 
-		return $this->getCacheValueOtherwise( 'meta-' . $platform->getCacheKey(), [ $platform, 'getMeta' ] );
+		return self::getCacheValueOtherwise( $this->metaCache, $platform->getCacheKey(), [ $platform, 'getMeta' ] );
 
 	}
 
-	protected function getCacheValueOtherwise( $cacheKey, callable $otherwise ) {
+	protected static function getCacheValueOtherwise( CacheInterface $cache, $cacheKey, callable $otherwise ) {
 
-		if ( $this->cache->has( $cacheKey ) ) {
+		if ( $cache->has( $cacheKey ) ) {
 
-			$value = $this->cache->get( $cacheKey, null );
+			$value = $cache->get( $cacheKey, null );
 
 		} else {
 
 			$value = $otherwise();
-			$this->cache->set( $cacheKey, $value );
+			$cache->set( $cacheKey, $value );
 
 		}
 
