@@ -4,6 +4,8 @@ namespace LachlanArthur\SocialDevFeed;
 
 class Entry extends SimpleObject {
 
+	use HasThumbnailsTrait;
+
 	/** @var string */
 	public $platform;
 
@@ -25,47 +27,6 @@ class Entry extends SimpleObject {
 		$this->platform = $platform;
 
 		$this->sortThumbnails();
-	}
-
-	/**
-	 * @return EntryImage
-	 */
-	public function getImage() {
-
-		if ( ! empty( $this->image ) ) {
-
-			return (object) [
-				'url' => $this->image,
-				'width' => $this->imageWidth,
-				'height' => $this->imageHeight,
-			];
-
-		} else {
-
-			return $this->getThumbnail();
-
-		}
-
-	}
-
-	public function getThumbnail() {
-
-		// The first thumbnail is the largest
-		return \reset( $this->thumbnails );
-
-	}
-
-	protected function sortThumbnails() {
-
-		// Order thumbnails largest to smallest
-		\usort( $this->thumbnails, [ $this, 'compareThumbnails' ] );
-
-	}
-
-	protected function compareThumbnails( $a, $b ) {
-
-		return ( $b->width * $b->height ) <=> ( $a->width * $a->height );
-
 	}
 
 	public function getDate() {
