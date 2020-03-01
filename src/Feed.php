@@ -48,14 +48,6 @@ class Feed {
 
 	}
 
-	protected function getCached() {
-		return \array_map( function( Platforms\PlatformInterface $platform ) {
-
-			return $this->cache->get( $platform->getCacheKey() ) ?? $platform;
-
-		}, $this->platforms );
-	}
-
 	protected function compareEntryTimestamps( Entry $a, Entry $b ) {
 		return $b->timestamp <=> $a->timestamp;
 	}
