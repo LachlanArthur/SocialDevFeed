@@ -54,10 +54,15 @@ class YouTube extends AbstractPlatformBase {
 
 	public function getEntries() {
 
+		try {
 		$items = $this->youtube->playlistItems->listPlaylistItems( 'snippet', [
 			'playlistId' => $this->playlistId,
 			'maxResults' => $this->limit,
 		] );
+		} catch ( \Exception $e ) {
+			// DO SOMETHING
+			return null;
+		}
 
 		return \array_map( [ $this, 'createEntryFromPlaylistItem' ], \iterator_to_array( $items ) );
 
