@@ -2,6 +2,8 @@
 
 namespace LachlanArthur\SocialDevFeed\Platforms;
 
+use LachlanArthur\SocialDevFeed\Entry;
+
 interface PlatformInterface {
 
 	/**
