@@ -18,7 +18,7 @@ class Feed {
 	/** @var CacheInterface Defaults to a filesystem cache with a 24 hour lifetime */
 	public $cache;
 
-	function __construct( CacheInterface $cache = null ) {
+	public function __construct( CacheInterface $cache = null ) {
 		$this->cache = $cache ?? new Psr16Cache( new FilesystemAdapter( 'lasdfg', 60 * 60 * 24, \sys_get_temp_dir() ) );
 	}
 
@@ -39,12 +39,7 @@ class Feed {
 
 		foreach ( $this->platforms as $platform ) {
 
-			/** @var Entry[] $platformEntries */
-			$platformEntries = $this->getCacheValueOtherwise( 'entries-' . $platform->getCacheKey(), [ $platform, 'getEntries' ] );
-
-			if ( ! \is_array( $platformEntries ) ) {
-				$platformEntries = [];
-			}
+			$platformEntries = $this->getPlatformEntries( $platform );
 
 			$allEntries = \array_merge( $allEntries, $platformEntries );
 
@@ -58,6 +53,23 @@ class Feed {
 	}
 
 	/**
+	 * @param PlatformInterface $platform
+	 * @return Entry[]
+	 */
+	public function getPlatformEntries( $platform ) {
+
+		/** @var Entry[] $entries */
+		$entries = $this->getCacheValueOtherwise( 'entries-' . $platform->getCacheKey(), [ $platform, 'getEntries' ] );
+
+		if ( ! \is_array( $entries ) ) {
+			$entries = [];
+		}
+
+		return $entries;
+
+	}
+
+	/**
 	 * @return Meta[]
 	 */
 	public function getMeta() {
@@ -66,14 +78,21 @@ class Feed {
 
 		foreach ( $this->platforms as $platform ) {
 
-			/** @var Meta $meta */
-			$platformMeta = $this->getCacheValueOtherwise( 'meta-' . $platform->getCacheKey(), [ $platform, 'getMeta' ] );
-
-			$metaList[] = $platformMeta;
+			$metaList[] = $this->getPlatformMeta( $platform );
 
 		}
 
 		return $metaList;
+
+	}
+
+	/**
+	 * @param PlatformInterface $platform
+	 * @return Meta
+	 */
+	public function getPlatformMeta( $platform ) {
+
+		return $this->getCacheValueOtherwise( 'meta-' . $platform->getCacheKey(), [ $platform, 'getMeta' ] );
 
 	}
 
