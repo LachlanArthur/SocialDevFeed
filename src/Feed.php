@@ -33,7 +33,7 @@ class Feed {
 	/**
 	 * @return Entry[]
 	 */
-	public function getEntries( $limit = 20 ) {
+	public function getEntries() {
 
 		$aggregateItems = [];
 
@@ -52,8 +52,6 @@ class Feed {
 
 		// Sort newest to oldest
 		\usort( $aggregateItems, [ $this, 'compareEntryDateTime' ] );
-
-		$aggregateItems = \array_slice( $aggregateItems, 0, $limit );
 
 		return $aggregateItems;
 
