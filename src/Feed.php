@@ -39,6 +39,7 @@ class Feed {
 
 		foreach ( $this->platforms as $platform ) {
 
+			/** @var Entry[] $platformItems */
 			$platformItems = $this->getCacheValueOtherwise( $platform->getCacheKey(), [ $platform, 'getEntries' ] );
 
 			if ( ! \is_array( $platformItems ) ) {
