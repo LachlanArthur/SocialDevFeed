@@ -72,23 +72,12 @@ class YouTube extends AbstractPlatformBase {
 	 * @param \Google_Service_YouTube_PlaylistItem $item
 	 * @return Entry
 	 */
-	public static function createEntryFromPlaylistItem( $item ) : Entry {
-
-		return self::createEntryFromVideo( $item->getSnippet()->getResourceId()->getVideoId(), $item );
-
-	}
-
-	/**
-	 * @param string $video_id
-	 * @param \Google_Service_YouTube_Video|\Google_Service_YouTube_PlaylistItem $snippet
-	 * @return Entry
-	 */
-	public static function createEntryFromVideo( $video_id, $item ) : Entry {
+	public static function createEntryFromPlaylistItem( $item ) {
 
 		$snippet = $item->getSnippet();
 
 		return new Entry( self::$name, [
-			'url' => "https://www.youtube.com/watch?v={$video_id}",
+			'url' => 'https://www.youtube.com/watch?v=' . $snippet->getResourceId()->getVideoId(),
 			'title' => $snippet->getTitle(),
 			'description' => $snippet->getDescription(),
 			'timestamp' => \date( DATE_ATOM, \strtotime( $snippet->getPublishedAt() ) ) ?: null,
