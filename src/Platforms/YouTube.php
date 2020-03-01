@@ -80,7 +80,7 @@ class YouTube extends AbstractPlatformBase {
 			'url' => 'https://www.youtube.com/watch?v=' . $snippet->getResourceId()->getVideoId(),
 			'title' => $snippet->getTitle(),
 			'description' => $snippet->getDescription(),
-			'timestamp' => \date( DATE_ATOM, \strtotime( $snippet->getPublishedAt() ) ) ?: null,
+			'datetime' => new \DateTime( $snippet->getPublishedAt(), new \DateTimeZone( 'UTC' ) ),
 			'thumbnails' => \array_map( function( $thumbnail ) {
 				return (object) [
 					'url' => $thumbnail->url,

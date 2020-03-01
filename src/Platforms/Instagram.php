@@ -51,7 +51,7 @@ class Instagram extends AbstractPlatformBase {
 			'url' => "https://www.instagram.com/p/{$node->shortcode}/",
 			'title' => $node->edge_media_to_caption->edges[0]->node->text,
 			'description' => null,
-			'timestamp' => \date( DATE_ATOM, $node->taken_at_timestamp ) ?: null,
+			'datetime' => new \DateTime( \date( \DATE_ATOM, $node->taken_at_timestamp ), new \DateTimeZone( 'UTC' ) ),
 			'image' => $node->display_url,
 			'imageWidth' => $node->dimensions->width,
 			'imageHeight' => $node->dimensions->height,

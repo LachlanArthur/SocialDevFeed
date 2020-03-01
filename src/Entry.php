@@ -9,8 +9,8 @@ class Entry extends SimpleObject {
 	/** @var string */
 	public $platform;
 
-	/** @var string */
-	public $timestamp = '0000-00-00T00:00:00+00:00';
+	/** @var \DateTime */
+	public $datetime;
 
 	/** @var string */
 	public $url;
@@ -27,12 +27,6 @@ class Entry extends SimpleObject {
 		$this->platform = $platform;
 
 		$this->sortThumbnails();
-	}
-
-	public function getDate() {
-
-		return new \DateTime( $this->timestamp );
-
 	}
 
 }

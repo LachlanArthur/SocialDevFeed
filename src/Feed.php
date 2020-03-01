@@ -50,7 +50,7 @@ class Feed {
 		}
 
 		// Sort newest to oldest
-		\usort( $aggregateItems, [ $this, 'compareEntryTimestamps' ] );
+		\usort( $aggregateItems, [ $this, 'compareEntryDateTime' ] );
 
 		$aggregateItems = \array_slice( $aggregateItems, 0, $limit );
 
@@ -75,8 +75,8 @@ class Feed {
 
 	}
 
-	protected function compareEntryTimestamps( Entry $a, Entry $b ) {
-		return $b->timestamp <=> $a->timestamp;
+	protected function compareEntryDateTime( Entry $a, Entry $b ) {
+		return $b->datetime <=> $a->datetime;
 	}
 
 }
