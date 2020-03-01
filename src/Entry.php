@@ -2,7 +2,7 @@
 
 namespace LachlanArthur\SocialDevFeed;
 
-class Entry {
+class Entry extends SimpleObject {
 
 	/** @var string */
 	public $platform;
@@ -19,25 +19,10 @@ class Entry {
 	/** @var string */
 	public $description;
 
-	/** @var string */
-	public $image;
-
-	/** @var integer */
-	public $imageWidth;
-
-	/** @var integer */
-	public $imageHeight;
-
-	/** @var EntryImage[] */
-	public $thumbnails = [];
-
 	public function __construct( string $platform, iterable $properties ) {
+		parent::__construct( $properties );
 
 		$this->platform = $platform;
-
-		foreach ( $properties as $property => $value ) {
-			$this->{$property} = $value;
-		}
 
 		$this->sortThumbnails();
 	}
