@@ -9,10 +9,12 @@ class YouTube extends AbstractPlatformBase {
 	public static $name = 'youtube';
 
 	/** @var string */
-	public $playlistId;
+	protected static $apiKey;
+
+	protected static $defaultLimit = 25;
 
 	/** @var string */
-	public $apiKey;
+	public $playlistId;
 
 	/** @var \Google_Client */
 	public $google;
@@ -23,20 +25,27 @@ class YouTube extends AbstractPlatformBase {
 	/** @var integer */
 	public $limit;
 
-	public function __construct( $playlistId, $apiKey, $limit = 25 ) {
+	public function __construct( $playlistId, $limit = null ) {
 
 		$this->playlistId = $playlistId;
-		$this->apiKey = $apiKey;
-		$this->limit = $limit;
+		$this->limit = $limit ?? self::$defaultLimit;
 
 		$this->google = new \Google_Client();
-		$this->google->setDeveloperKey( $apiKey );
+		$this->google->setDeveloperKey( self::$apiKey );
 		$this->google->setScopes( [
 			'https://www.googleapis.com/auth/youtube.readonly',
 		] );
 
 		$this->youtube = new \Google_Service_YouTube( $this->google );
 
+	}
+
+	public static function setApiKey( $apiKey ) {
+		self::$apiKey = $apiKey;
+	}
+
+	public static function setDefaultLimit( $limit ) {
+		self::$defaultLimit = $limit;
 	}
 
 	public function getCacheKey() {
