@@ -46,6 +46,10 @@ class YouTube extends AbstractPlatformBase {
 		self::$apiKey = $apiKey;
 	}
 
+	public static function hasApiKey() {
+		return ! empty( self::$apiKey );
+	}
+
 	public static function setDefaultLimit( $limit ) {
 		self::$defaultLimit = $limit;
 	}
