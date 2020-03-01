@@ -104,13 +104,24 @@ class YouTube extends AbstractPlatformBase {
 			/** @var \Google_Service_YouTube_Playlist $playlist */
 			$playlist = reset( $playlists );
 
-			$snippet = $playlist->getSnippet();
+			$playlistSnippet = $playlist->getSnippet();
+
+			$authorChannelResponse = $this->youtube->channels->listChannels( 'snippet', [
+				'id' => $playlistSnippet->getChannelId(),
+			] );
+
+			$authorChannels = $authorChannelResponse->getItems();
+
+			/** @var \Google_Service_YouTube_Channel $authorChannel */
+			$authorChannel = reset( $authorChannels );
+
+			$authorChannelSnippet = $authorChannel->getSnippet();
 
 			return new Meta( self::$name, [
-				'title' => $snippet->getTitle(),
-				'author' => $snippet->getChannelTitle(),
+				'title' => $playlistSnippet->getTitle(),
+				'author' => $authorChannelSnippet->getTitle(),
 				'url' => "https://www.youtube.com/playlist?list={$this->playlistId}",
-				'thumbnails' => self::processThumbnails( $snippet->getThumbnails() ),
+				'thumbnails' => self::processThumbnails( $authorChannelSnippet->getThumbnails() ),
 			] );
 		} catch ( \Exception $e ) {
 			return null;
