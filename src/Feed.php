@@ -35,25 +35,25 @@ class Feed {
 	 */
 	public function getEntries() {
 
-		$aggregateItems = [];
+		$allEntries = [];
 
 		foreach ( $this->platforms as $platform ) {
 
-			/** @var Entry[] $platformItems */
-			$platformItems = $this->getCacheValueOtherwise( 'entries-' . $platform->getCacheKey(), [ $platform, 'getEntries' ] );
+			/** @var Entry[] $platformEntries */
+			$platformEntries = $this->getCacheValueOtherwise( 'entries-' . $platform->getCacheKey(), [ $platform, 'getEntries' ] );
 
-			if ( ! \is_array( $platformItems ) ) {
-				$platformItems = [];
+			if ( ! \is_array( $platformEntries ) ) {
+				$platformEntries = [];
 			}
 
-			$aggregateItems = \array_merge( $aggregateItems, $platformItems );
+			$allEntries = \array_merge( $allEntries, $platformEntries );
 
 		}
 
 		// Sort newest to oldest
-		\usort( $aggregateItems, [ $this, 'compareEntryDateTime' ] );
+		\usort( $allEntries, [ $this, 'compareEntryDateTime' ] );
 
-		return $aggregateItems;
+		return $allEntries;
 
 	}
 
