@@ -6,10 +6,12 @@ use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 
+use LachlanArthur\SocialDevFeed\Platforms\PlatformInterface;
+
 class Feed {
 
 	/**
-	 * @var Platforms\PlatformInterface[]
+	 * @var PlatformInterface[]
 	 */
 	public $platforms = [];
 
@@ -20,7 +22,7 @@ class Feed {
 		$this->cache = $cache ?? new Psr16Cache( new FilesystemAdapter( 'lasdfg', 60 * 60 * 24, \sys_get_temp_dir() . '/social-dev-feed' ) );
 	}
 
-	public function add( Platforms\PlatformInterface $platform ) : void {
+	public function add( PlatformInterface $platform ) : void {
 		$this->platforms[] = $platform;
 	}
 
