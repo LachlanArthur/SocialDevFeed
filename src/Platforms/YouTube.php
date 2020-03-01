@@ -8,7 +8,8 @@ use LachlanArthur\SocialDevFeed\Meta;
 
 class YouTube extends AbstractPlatformBase {
 
-	public static $name = 'youtube';
+	public static function getName() { return 'youtube'; }
+	public static function getTitle() { return 'YouTube'; }
 
 	/** @var string */
 	protected static $apiKey;
@@ -55,7 +56,7 @@ class YouTube extends AbstractPlatformBase {
 	}
 
 	public function getCacheKey() {
-		return self::$name . '-' . $this->playlistId;
+		return self::getName() . '-' . $this->playlistId;
 	}
 
 	public function getEntries() {
@@ -82,7 +83,7 @@ class YouTube extends AbstractPlatformBase {
 
 		$snippet = $item->getSnippet();
 
-		return new Entry( self::$name, [
+		return new Entry( self::getName(), [
 			'url' => 'https://www.youtube.com/watch?v=' . $snippet->getResourceId()->getVideoId(),
 			'title' => $snippet->getTitle(),
 			'description' => $snippet->getDescription(),
@@ -117,7 +118,7 @@ class YouTube extends AbstractPlatformBase {
 
 			$authorChannelSnippet = $authorChannel->getSnippet();
 
-			return new Meta( self::$name, [
+			return new Meta( self::getName(), [
 				'title' => $playlistSnippet->getTitle(),
 				'author' => $authorChannelSnippet->getTitle(),
 				'url' => "https://www.youtube.com/playlist?list={$this->playlistId}",

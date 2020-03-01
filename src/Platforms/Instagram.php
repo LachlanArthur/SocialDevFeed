@@ -7,7 +7,8 @@ use LachlanArthur\SocialDevFeed\Meta;
 
 class Instagram extends AbstractPlatformBase {
 
-	public static $name = 'instagram';
+	public static function getName() { return 'instagram'; }
+	public static function getTitle() { return 'Instagram'; }
 
 	/** @var string */
 	public $username;
@@ -27,7 +28,7 @@ class Instagram extends AbstractPlatformBase {
 	}
 
 	public function getCacheKey() {
-		return self::$name . '-' . $this->username;
+		return self::getName() . '-' . $this->username;
 	}
 
 	protected function getJson() {
@@ -68,7 +69,7 @@ class Instagram extends AbstractPlatformBase {
 			];
 		}
 
-		return new Entry( self::$name, [
+		return new Entry( self::getName(), [
 			'url' => "https://www.instagram.com/p/{$node->shortcode}/",
 			'title' => $node->edge_media_to_caption->edges[0]->node->text,
 			'description' => null,
@@ -85,7 +86,7 @@ class Instagram extends AbstractPlatformBase {
 
 			$user = $json->graphql->user;
 
-			return new Meta( self::$name, [
+			return new Meta( self::getName(), [
 				'title' => $user->full_name,
 				'author' => $user->full_name,
 				'url' => "https://www.instagram.com/{$user->username}/",
