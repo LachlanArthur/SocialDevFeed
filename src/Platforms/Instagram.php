@@ -52,21 +52,28 @@ class Instagram extends AbstractPlatformBase {
 
 		$node = $edge->node;
 
+		$thumbnails = [
+			(object) [
+				'image' => $node->display_url,
+				'imageWidth' => $node->dimensions->width,
+				'imageHeight' => $node->dimensions->height,
+			],
+		];
+
+		foreach ( $node->thumbnail_resources as $thumbnail_resource ) {
+			$thumbnails[] = (object) [
+				'url' => $thumbnail_resource->src,
+				'width' => $thumbnail_resource->config_width,
+				'height' => $thumbnail_resource->config_height,
+			];
+		}
+
 		return new Entry( self::$name, [
 			'url' => "https://www.instagram.com/p/{$node->shortcode}/",
 			'title' => $node->edge_media_to_caption->edges[0]->node->text,
 			'description' => null,
 			'datetime' => new \DateTime( \date( \DATE_ATOM, $node->taken_at_timestamp ), new \DateTimeZone( 'UTC' ) ),
-			'image' => $node->display_url,
-			'imageWidth' => $node->dimensions->width,
-			'imageHeight' => $node->dimensions->height,
-			'thumbnails' => \array_map( function( $thumbnail ) {
-				return (object) [
-					'url' => $thumbnail->src,
-					'width' => $thumbnail->config_width,
-					'height' => $thumbnail->config_height,
-				];
-			}, $node->thumbnail_resources ),
+			'thumbnails' => $thumbnails,
 		] );
 
 	}
