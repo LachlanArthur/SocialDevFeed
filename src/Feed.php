@@ -43,7 +43,7 @@ class Feed {
 
 		foreach ( $this->platforms as $platform ) {
 
-			$platformEntries = $this->getPlatformEntries( $platform );
+			$platformEntries = $this->getCachedEntries( $platform );
 
 			$allEntries = \array_merge( $allEntries, $platformEntries );
 
@@ -60,7 +60,7 @@ class Feed {
 	 * @param PlatformInterface $platform
 	 * @return Entry[]
 	 */
-	public function getPlatformEntries( $platform ) {
+	public function getCachedEntries( $platform ) {
 
 		/** @var Entry[] $entries */
 		$entries = self::getCacheValueOtherwise( $this->entriesCache, $platform->getCacheKey(), [ $platform, 'getEntries' ] );
@@ -82,7 +82,7 @@ class Feed {
 
 		foreach ( $this->platforms as $platform ) {
 
-			$metaList[] = $this->getPlatformMeta( $platform );
+			$metaList[] = $this->getCachedMeta( $platform );
 
 		}
 
@@ -94,7 +94,7 @@ class Feed {
 	 * @param PlatformInterface $platform
 	 * @return Meta
 	 */
-	public function getPlatformMeta( $platform ) {
+	public function getCachedMeta( $platform ) {
 
 		return self::getCacheValueOtherwise( $this->metaCache, $platform->getCacheKey(), [ $platform, 'getMeta' ] );
 
