@@ -7,6 +7,9 @@ trait HasThumbnailsTrait {
 	/** @var EntryImage[] */
 	public $thumbnails = [];
 
+	/**
+	 * @return EntryImage
+	 */
 	public function getThumbnail() {
 
 		// The first thumbnail is the largest
