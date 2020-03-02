@@ -10,6 +10,7 @@ class YouTube extends AbstractPlatformBase {
 
 	public static function getName() { return 'youtube'; }
 	public static function getTitle() { return 'YouTube'; }
+	public static function getIdLabel() { return 'Playlist ID'; }
 
 	/** @var string */
 	protected static $apiKey;

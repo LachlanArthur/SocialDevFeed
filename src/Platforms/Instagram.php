@@ -9,6 +9,7 @@ class Instagram extends AbstractPlatformBase {
 
 	public static function getName() { return 'instagram'; }
 	public static function getTitle() { return 'Instagram'; }
+	public static function getIdLabel() { return 'Username'; }
 
 	/** @var string */
 	public $username;

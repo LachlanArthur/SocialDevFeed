@@ -24,6 +24,13 @@ interface PlatformInterface {
 	public static function getTitle();
 
 	/**
+	 * Get the label of the ID for this platform.
+	 *
+	 * @return string
+	 */
+	public static function getIdLabel();
+
+	/**
 	 * @return string
 	 */
 	public function getCacheKey();
