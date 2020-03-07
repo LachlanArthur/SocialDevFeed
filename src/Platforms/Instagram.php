@@ -32,11 +32,10 @@ class Instagram extends AbstractPlatformBase {
 		try {
 			$json = $this->getJson();
 			$edges = $json->graphql->user->edge_owner_to_timeline_media->edges;
+			return \array_map( [ $this, 'createEntryFromEdge' ], $edges );
 		} catch ( \Throwable $e ) {
 			return null;
 		}
-
-		return \array_map( [ $this, 'createEntryFromEdge' ], $edges );
 
 	}
 
