@@ -17,14 +17,10 @@ class YouTube extends AbstractPlatformBase {
 
 	protected static $defaultLimit = 25;
 
+	public $baseUrl = 'https://www.googleapis.com';
+
 	/** @var string */
 	public $playlistId;
-
-	/** @var \Google_Client */
-	public $google;
-
-	/** @var \Google_Service_YouTube */
-	public $youtube;
 
 	/** @var integer */
 	public $limit;
@@ -33,14 +29,6 @@ class YouTube extends AbstractPlatformBase {
 
 		$this->playlistId = $playlistId;
 		$this->limit = $limit ?? self::$defaultLimit;
-
-		$this->google = new \Google_Client();
-		$this->google->setDeveloperKey( self::$apiKey );
-		$this->google->setScopes( [
-			'https://www.googleapis.com/auth/youtube.readonly',
-		] );
-
-		$this->youtube = new \Google_Service_YouTube( $this->google );
 
 	}
 
@@ -60,36 +48,73 @@ class YouTube extends AbstractPlatformBase {
 		return self::getName() . '-' . $this->playlistId;
 	}
 
+	protected function requestPlaylistItems( $playlistId, $limit ) {
+
+		$json = $this->request( 'get', "{$this->baseUrl}/youtube/v3/playlistItems", [
+			'part' => 'snippet',
+			'playlistId' => $playlistId,
+			'maxResults' => $limit,
+			'key' => self::$apiKey,
+		] );
+
+		$response = \json_decode( $json );
+
+		return $response->items;
+
+	}
+
+	protected function requestPlaylist( $playlistId ) {
+
+		$json = $this->request( 'get', "{$this->baseUrl}/youtube/v3/playlists", [
+			'part' => 'snippet',
+			'id' => $playlistId,
+			'key' => self::$apiKey,
+		] );
+
+		$response = \json_decode( $json );
+
+		return reset( $response->items );
+
+	}
+
+	protected function requestChannel( $channelId ) {
+
+		$json = $this->request( 'get', "{$this->baseUrl}/youtube/v3/channels", [
+			'part' => 'snippet',
+			'id' => $channelId,
+			'key' => self::$apiKey,
+		] );
+
+		$response = \json_decode( $json );
+
+		return reset( $response->items );
+
+	}
+
 	public function getEntries() {
 
 		try {
-			$items = $this->youtube->playlistItems->listPlaylistItems( 'snippet', [
-				'playlistId' => $this->playlistId,
-				'maxResults' => $this->limit,
-			] );
-		} catch ( \Exception $e ) {
-			// DO SOMETHING
+			return \array_map( [ $this, 'createEntryFromPlaylistItem' ], $this->requestPlaylistItems( $this->playlistId, $this->limit ) );
+		} catch ( \Throwable $e ) {
 			return null;
 		}
-
-		return \array_map( [ $this, 'createEntryFromPlaylistItem' ], \iterator_to_array( $items ) );
 
 	}
 
 	/**
-	 * @param \Google_Service_YouTube_PlaylistItem $item
+	 * @param object $item
 	 * @return Entry
 	 */
 	public static function createEntryFromPlaylistItem( $item ) {
 
-		$snippet = $item->getSnippet();
+		$snippet = $item->snippet;
 
 		return new Entry( self::getName(), [
-			'url' => 'https://www.youtube.com/watch?v=' . $snippet->getResourceId()->getVideoId(),
-			'title' => $snippet->getTitle(),
-			'description' => $snippet->getDescription(),
-			'datetime' => new \DateTime( $snippet->getPublishedAt(), new \DateTimeZone( 'UTC' ) ),
-			'thumbnails' => self::processThumbnails( $snippet->getThumbnails() ),
+			'url' => 'https://www.youtube.com/watch?v=' . $snippet->resourceId->videoId,
+			'title' => $snippet->title,
+			'description' => $snippet->description,
+			'datetime' => new \DateTime( $snippet->publishedAt, new \DateTimeZone( 'UTC' ) ),
+			'thumbnails' => self::processThumbnails( $snippet->thumbnails ),
 		] );
 
 	}
@@ -97,48 +122,32 @@ class YouTube extends AbstractPlatformBase {
 	public function getMeta() {
 
 		try {
-			$playlistsResponse = $this->youtube->playlists->listPlaylists( 'snippet', [
-				'id' => $this->playlistId,
-			] );
+			$playlist = $this->requestPlaylist( $this->playlistId );
+			$playlistSnippet = $playlist->snippet;
 
-			$playlists = $playlistsResponse->getItems();
-
-			/** @var \Google_Service_YouTube_Playlist $playlist */
-			$playlist = reset( $playlists );
-
-			$playlistSnippet = $playlist->getSnippet();
-
-			$authorChannelResponse = $this->youtube->channels->listChannels( 'snippet', [
-				'id' => $playlistSnippet->getChannelId(),
-			] );
-
-			$authorChannels = $authorChannelResponse->getItems();
-
-			/** @var \Google_Service_YouTube_Channel $authorChannel */
-			$authorChannel = reset( $authorChannels );
-
-			$authorChannelSnippet = $authorChannel->getSnippet();
+			$authorChannel = $this->requestChannel( $playlistSnippet->channelId );
+			$authorChannelSnippet = $authorChannel->snippet;
 
 			return new Meta( self::getName(), [
-				'title' => $playlistSnippet->getTitle(),
-				'author' => $authorChannelSnippet->getTitle(),
+				'title' => $playlistSnippet->title,
+				'author' => $authorChannelSnippet->title,
 				'url' => "https://www.youtube.com/playlist?list={$this->playlistId}",
-				'thumbnails' => self::processThumbnails( $authorChannelSnippet->getThumbnails() ),
+				'thumbnails' => self::processThumbnails( $authorChannelSnippet->thumbnails ),
 			] );
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return null;
 		}
 
 	}
 
 	/**
-	 * @param \Google_Service_YouTube_ThumbnailDetails $youtubeThumbnails
+	 * @param object $youtubeThumbnails
 	 * @return EntryImage[]
 	 */
 	public static function processThumbnails( $youtubeThumbnails ) {
 		$thumbnails = [];
 
-		foreach ( \array_values( (array) $youtubeThumbnails->toSimpleObject() ) as $thumbnail ) {
+		foreach ( \array_values( (array) $youtubeThumbnails ) as $thumbnail ) {
 			$thumbnails[] = (object) [
 				'url' => $thumbnail->url,
 				'width' => $thumbnail->width,

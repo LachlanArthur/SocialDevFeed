@@ -3,9 +3,7 @@
 namespace LachlanArthur\SocialDevFeed;
 
 use Psr\SimpleCache\CacheInterface;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Cache\Psr16Cache;
-
+use Psr\Http\Client\ClientInterface as HttpClientInterface;
 use LachlanArthur\SocialDevFeed\Platforms\PlatformInterface;
 
 class Feed {
@@ -15,15 +13,18 @@ class Feed {
 	 */
 	public $platforms = [];
 
-	/** @var CacheInterface Defaults to a filesystem cache with a 24 hour lifetime */
+	/** @var CacheInterface */
 	public $entriesCache;
 
-	/** @var CacheInterface Defaults to a filesystem cache with a 30 day lifetime */
+	/** @var CacheInterface */
 	public $metaCache;
 
-	public function __construct( CacheInterface $entriesCache = null, CacheInterface $metaCache = null ) {
-		$this->entriesCache = $entriesCache ?? new Psr16Cache( new FilesystemAdapter( 'lasdfg-entries', 60 * 60 * 24,      \sys_get_temp_dir() ) );
-		$this->metaCache    = $metaCache    ?? new Psr16Cache( new FilesystemAdapter( 'lasdfg-meta',    60 * 60 * 24 * 30, \sys_get_temp_dir() ) );
+	/** @var resource */
+	protected static $curlHandle = null;
+
+	public function __construct( CacheInterface $entriesCache, CacheInterface $metaCache ) {
+		$this->entriesCache = $entriesCache;
+		$this->metaCache    = $metaCache;
 	}
 
 	public function add( PlatformInterface $platform ) : void {
@@ -82,7 +83,11 @@ class Feed {
 
 		foreach ( $this->platforms as $platform ) {
 
-			$metaList[] = $this->getCachedMeta( $platform );
+			$meta = $this->getCachedMeta( $platform );
+
+			if ( ! empty( $meta ) ) {
+				$metaList[] = $meta;
+			}
 
 		}
 
@@ -119,6 +124,93 @@ class Feed {
 
 	protected function compareEntryDateTime( Entry $a, Entry $b ) {
 		return $b->datetime <=> $a->datetime;
+	}
+
+	public static function getCurlHandle() {
+
+		if ( self::$curlHandle === null ) {
+			self::$curlHandle = \curl_init();
+		}
+
+		return self::$curlHandle;
+
+	}
+
+	/**
+	 * @param string $url
+	 * @param string|array $params
+	 * @return string
+	 */
+	public static function mergeUrlParams( $url, $params ) {
+
+		$urlBase = $url;
+		$existingParams = [];
+		$mergeParams = [];
+
+		if ( strpos( $url, '?' ) !== false ) {
+			[ $urlBase, $urlParamString ] = explode( '?', $url, 2 );
+			if ( ! empty( $urlParamString ) ) {
+				\parse_str( $urlParamString, $existingParams );
+			}
+		}
+
+		if ( is_string( $params ) ) {
+			\parse_str( $params, $mergeParams );
+		} else if ( is_array( $params ) ) {
+			$mergeParams = $params;
+		}
+
+		$newQuery = \http_build_query( \array_merge( $existingParams, $mergeParams ) );
+
+		if ( ! empty( $newQuery ) ) {
+			$newQuery = '?' . $newQuery;
+		}
+
+		return $urlBase . $newQuery;
+
+	}
+
+	public static function request( $method, $url, $body = null, $curlOptions = [] ) {
+
+		$method = \strtoupper( $method );
+
+		if ( $method === 'GET' && ! empty( $body ) ) {
+			$url = self::mergeUrlParams( $url, $body );
+			$body = null;
+		}
+
+		$ch = self::getCurlHandle();
+
+		$options = [
+			CURLOPT_USERAGENT => 'LachlanArthur/SocialDevFeed/1.0',
+			CURLOPT_CUSTOMREQUEST => $method,
+			CURLOPT_URL => $url,
+			CURLOPT_TIMEOUT => 5,
+			CURLOPT_RETURNTRANSFER => true,
+		];
+
+		switch ( $method ) {
+
+			case 'GET':
+				// Do nothing
+				break;
+
+			case 'HEAD':
+				$options[ CURLOPT_NOBODY ] = true;
+				break;
+
+			default:
+				$options[ CURLOPT_POSTFIELDS ] = $body;
+				break;
+
+		}
+
+		$options += $curlOptions;
+
+		\curl_setopt_array( $ch, $options );
+
+		return \curl_exec( $ch );
+
 	}
 
 }

@@ -14,18 +14,8 @@ class Instagram extends AbstractPlatformBase {
 	/** @var string */
 	public $username;
 
-	/** @var \GuzzleHttp\ClientInterface */
-	public $http;
-
-	public function __construct( $username, \GuzzleHttp\ClientInterface $http = null ) {
+	public function __construct( $username ) {
 		$this->username = $username;
-		$this->http = $http ?? new \GuzzleHttp\Client( [
-			'base_uri' => 'https://www.instagram.com',
-			'timeout' => 5,
-			'headers' => [
-				'User-Agent' => 'LachlanArthur/SocialDevFeed/1.0',
-			],
-		] );
 	}
 
 	public function getCacheKey() {
@@ -33,8 +23,8 @@ class Instagram extends AbstractPlatformBase {
 	}
 
 	protected function getJson() {
-		$response = $this->http->request( 'get', "/{$this->username}/?__a=1" );
-		return \json_decode( (string) $response->getBody() );
+		$json = $this->request( 'get', "https://www.instagram.com/{$this->username}/?__a=1" );
+		return \json_decode( $json );
 	}
 
 	public function getEntries() {
@@ -42,7 +32,7 @@ class Instagram extends AbstractPlatformBase {
 		try {
 			$json = $this->getJson();
 			$edges = $json->graphql->user->edge_owner_to_timeline_media->edges;
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return null;
 		}
 
@@ -93,7 +83,7 @@ class Instagram extends AbstractPlatformBase {
 				'url' => "https://www.instagram.com/{$user->username}/",
 				'thumbnails' => [ (object) [ 'url' => $user->profile_pic_url_hd ] ],
 			] );
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return null;
 		}
 
