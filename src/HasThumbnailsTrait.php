@@ -19,6 +19,10 @@ trait HasThumbnailsTrait {
 
 	protected function sortThumbnails() {
 
+		if ( ! is_array( $this->thumbnails ) ) $this->thumbnails = [];
+
+		if ( empty( $this->thumbnails ) ) return;
+
 		// Order thumbnails largest to smallest
 		\usort( $this->thumbnails, [ $this, 'compareThumbnails' ] );
 
