@@ -61,7 +61,7 @@ class Instagram extends AbstractPlatformBase {
 
 		return new Entry( self::getName(), [
 			'url' => "https://www.instagram.com/p/{$node->shortcode}/",
-			'title' => $node->edge_media_to_caption->edges[0]->node->text,
+			'title' => $node->edge_media_to_caption->edges[0]->node->text ?? null,
 			'description' => null,
 			'datetime' => new \DateTime( \date( \DATE_ATOM, $node->taken_at_timestamp ), new \DateTimeZone( 'UTC' ) ),
 			'thumbnails' => $thumbnails,
