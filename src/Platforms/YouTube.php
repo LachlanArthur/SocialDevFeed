@@ -45,7 +45,7 @@ class YouTube extends AbstractPlatformBase {
 	}
 
 	public function getCacheKey() {
-		return self::getName() . '-' . $this->playlistId;
+		return self::getName() . '-' . \md5( $this->playlistId );
 	}
 
 	protected function requestPlaylistItems( $playlistId, $limit ) {

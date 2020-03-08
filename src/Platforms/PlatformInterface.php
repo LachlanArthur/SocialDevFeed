@@ -31,6 +31,12 @@ interface PlatformInterface {
 	public static function getIdLabel();
 
 	/**
+	 * Unique key for caching this instance's output
+	 *
+	 * Must follow [PSR-16](https://www.php-fig.org/psr/psr-16/) cache key rules.
+	 *
+	 * Cannot contain the following characters: `{}()/\@:`
+	 *
 	 * @return string
 	 */
 	public function getCacheKey();

@@ -19,7 +19,7 @@ class Instagram extends AbstractPlatformBase {
 	}
 
 	public function getCacheKey() {
-		return self::getName() . '-' . $this->username;
+		return self::getName() . '-' . \md5( $this->username );
 	}
 
 	protected function getJson() {

@@ -21,7 +21,7 @@ class WordPressRest extends AbstractPlatformBase {
 	}
 
 	public function getCacheKey() {
-		return self::getName() . '-' . $this->URL;
+		return self::getName() . '-' . \md5( $this->URL );
 	}
 
 	public function getEntries() {

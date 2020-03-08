@@ -64,7 +64,7 @@ class Feed {
 	public function getCachedEntries( $platform ) {
 
 		/** @var Entry[] $entries */
-		$entries = self::getCacheValueOtherwise( $this->entriesCache, base64_encode( $platform->getCacheKey() ), [ $platform, 'getEntries' ] );
+		$entries = self::getCacheValueOtherwise( $this->entriesCache, $platform->getCacheKey(), [ $platform, 'getEntries' ] );
 
 		if ( ! \is_array( $entries ) ) {
 			$entries = [];
@@ -101,7 +101,7 @@ class Feed {
 	 */
 	public function getCachedMeta( $platform ) {
 
-		return self::getCacheValueOtherwise( $this->metaCache, base64_encode( $platform->getCacheKey() ), [ $platform, 'getMeta' ] );
+		return self::getCacheValueOtherwise( $this->metaCache, $platform->getCacheKey(), [ $platform, 'getMeta' ] );
 
 	}
 
