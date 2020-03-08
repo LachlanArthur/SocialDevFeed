@@ -8,6 +8,15 @@ trait HasThumbnailsTrait {
 	public $thumbnails = [];
 
 	/**
+	 * @return boolean
+	 */
+	public function hasThumbnail() {
+
+		return ! empty( $this->thumbnails );
+
+	}
+
+	/**
 	 * @return EntryImage
 	 */
 	public function getThumbnail() {
