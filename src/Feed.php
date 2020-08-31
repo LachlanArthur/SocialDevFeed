@@ -187,6 +187,7 @@ class Feed {
 			CURLOPT_URL => $url,
 			CURLOPT_TIMEOUT => 5,
 			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_REFERER => $_SERVER[ 'HTTP_HOST' ],
 		];
 
 		switch ( $method ) {
