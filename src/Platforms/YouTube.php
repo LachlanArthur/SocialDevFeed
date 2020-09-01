@@ -25,10 +25,14 @@ class YouTube extends AbstractPlatformBase {
 	/** @var integer */
 	public $limit;
 
-	public function __construct( $playlistId, $limit = null ) {
+	public function __construct( $playlistId, $args = [] ) {
+
+		$args = array_merge( [
+			'limit' => self::$defaultLimit,
+		], $args );
 
 		$this->playlistId = $playlistId;
-		$this->limit = $limit ?? self::$defaultLimit;
+		$this->limit = $args[ 'limit' ];
 
 	}
 

@@ -14,8 +14,13 @@ class Instagram extends AbstractPlatformBase {
 	/** @var string */
 	public $username;
 
-	public function __construct( $username ) {
+	public function __construct( $username, $args = [] ) {
+
+		$args = array_merge( [
+		], $args );
+
 		$this->username = $username;
+
 	}
 
 	public function getCacheKey() {

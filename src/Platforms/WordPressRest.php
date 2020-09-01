@@ -14,7 +14,10 @@ class WordPressRest extends AbstractPlatformBase {
 	/** @var string */
 	public $URL;
 
-	public function __construct( $URL ) {
+	public function __construct( $URL, $args = [] ) {
+
+		$args = array_merge( [
+		], $args );
 
 		$this->URL = $URL;
 
