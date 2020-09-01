@@ -3,7 +3,6 @@
 namespace LachlanArthur\SocialDevFeed;
 
 use Psr\SimpleCache\CacheInterface;
-use Psr\Http\Client\ClientInterface as HttpClientInterface;
 use LachlanArthur\SocialDevFeed\Platforms\PlatformInterface;
 
 class Feed {
@@ -206,9 +205,11 @@ class Feed {
 
 		}
 
-		$options += $curlOptions;
+		$options = array_replace( $options, $curlOptions );
 
-		\curl_setopt_array( $ch, $options );
+		foreach ( $options as $option_key => $option_value ) {
+			\curl_setopt( $ch, $option_key, $option_value );
+		}
 
 		return \curl_exec( $ch );
 
