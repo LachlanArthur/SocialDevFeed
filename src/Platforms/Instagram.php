@@ -9,87 +9,126 @@ class Instagram extends AbstractPlatformBase {
 
 	public static function getName() { return 'instagram'; }
 	public static function getTitle() { return 'Instagram'; }
-	public static function getIdLabel() { return 'Username'; }
+	public static function getIdLabel() { return 'Access Token'; }
+
+	protected static $defaultLimit = 25;
 
 	/** @var string */
-	public $username;
+	protected $token;
 
-	public function __construct( $username, $args = [] ) {
+	public function __construct( $token, $args = [] ) {
 
 		$args = array_merge( [
+			'limit' => self::$defaultLimit,
 		], $args );
 
-		$this->username = $username;
+		$this->token = $token;
+		$this->limit = $args[ 'limit' ];
 
+	}
+
+	public static function setDefaultLimit( $limit ) {
+		self::$defaultLimit = $limit;
 	}
 
 	public function getCacheKey() {
-		return self::getName() . '-' . \md5( $this->username );
+		return self::getName() . '-' . \md5( $this->token );
 	}
 
-	protected function getJson() {
-		$json = $this->request( 'get', "https://www.instagram.com/{$this->username}/?__a=1" );
-		return \json_decode( $json );
+	protected function requestMyMedia() {
+		try {
+
+			$json = $this->request( 'get', 'https://graph.instagram.com/me/media', [
+				'fields' => 'id,caption,media_type,media_url,permalink,thumbnail_url,timestamp',
+				'limit' => $this->limit,
+				'access_token' => $this->token,
+			] );
+
+			return \json_decode( $json );
+
+		} catch ( \Throwable $e ) {
+
+			return (object) [
+				'data' => [],
+				'paging' => [],
+			];
+
+		}
+	}
+
+	protected function requestMyDetails() {
+		try {
+
+			$json = $this->request( 'get', 'https://graph.instagram.com/me', [
+				'fields' => 'id,username',
+				'access_token' => $this->token,
+			] );
+
+			return \json_decode( $json );
+
+		} catch ( \Throwable $e ) {
+
+			return (object) [];
+
+		}
 	}
 
 	public function getEntries() {
 
-		try {
-			$json = $this->getJson();
-			$edges = $json->graphql->user->edge_owner_to_timeline_media->edges;
-			return \array_map( [ $this, 'createEntryFromEdge' ], $edges );
-		} catch ( \Throwable $e ) {
-			return null;
-		}
+		$response = $this->requestMyMedia();
+
+		return \array_filter( \array_map( [ $this, 'createEntryFromMedia' ], $response->data ) );
 
 	}
 
-	protected function createEntryFromEdge( $edge ) {
+	protected function createEntryFromMedia( $media ) {
 
-		$node = $edge->node;
+		// Item is unavailable for copyright reasons.
+		if ( empty( $media->permalink ) ) return false;
 
-		$thumbnails = [
-			(object) [
-				'url' => $node->display_url,
-				'width' => $node->dimensions->width,
-				'height' => $node->dimensions->height,
-			],
+		$entryData = [
+			'url' => $media->permalink,
+			'title' => $media->caption,
+			'description' => null,
+			'datetime' => new \DateTime( $media->timestamp, new \DateTimeZone( 'UTC' ) ),
+			'thumbnails' => [],
 		];
 
-		foreach ( $node->thumbnail_resources as $thumbnail_resource ) {
-			$thumbnails[] = (object) [
-				'url' => $thumbnail_resource->src,
-				'width' => $thumbnail_resource->config_width,
-				'height' => $thumbnail_resource->config_height,
-			];
+		switch ( $media->media_type ) {
+
+			case 'IMAGE':
+			case 'CAROUSEL_ALBUM':
+				$entryData[ 'thumbnails' ][] = (object) [
+					'url' => $media->media_url,
+					'width' => null,
+					'height' => null,
+				];
+				break;
+
+			case 'VIDEO':
+				$entryData[ 'thumbnails' ][] = (object) [
+					'url' => $media->thumbnail_url,
+					'width' => null,
+					'height' => null,
+				];
+				break;
+
 		}
 
-		return new Entry( self::getName(), [
-			'url' => "https://www.instagram.com/p/{$node->shortcode}/",
-			'title' => $node->edge_media_to_caption->edges[0]->node->text ?? null,
-			'description' => null,
-			'datetime' => new \DateTime( \date( \DATE_ATOM, $node->taken_at_timestamp ), new \DateTimeZone( 'UTC' ) ),
-			'thumbnails' => $thumbnails,
-		] );
+		return new Entry( self::getName(), $entryData );
 
 	}
 
 	public function getMeta() {
 
-		try {
-			$json = $this->getJson();
+		$response = $this->requestMyDetails();
 
-			$user = $json->graphql->user;
-
-			return new Meta( self::getName(), [
-				'title' => $user->full_name,
-				'author' => $user->full_name,
-				'url' => "https://www.instagram.com/{$user->username}/",
-				'thumbnails' => [ (object) [ 'url' => $user->profile_pic_url_hd ] ],
-			] );
-		} catch ( \Throwable $e ) {
-			return null;
-		}
+		return new Meta( self::getName(), [
+			'title' => $response->username,
+			'author' => $response->username,
+			'url' => "https://www.instagram.com/{$response->username}/",
+			'thumbnails' => [],
+		] );
 
 	}
 
